@@ -30,4 +30,12 @@ This is a python script that automates, downloading of trailers from youtube usi
     * *the config file is not currently working. For now, edit the script directly+*
 8. Run manually like any other script.
     * *cron and windows task scheduler are currently untested but should work fine*
+
 ---
+
+# Credit
+
+Thank you to the [youtube-dl](https://github.com/rg3/youtube-dl) team
+
+This product uses the TMDb API but is not endorsed or certified by TMDb
+![Plex Web View](http://i.imgur.com/YR33JTt.png)
