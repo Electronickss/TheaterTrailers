@@ -34,6 +34,11 @@ This is a python script that automates, downloading of trailers from youtube usi
     * *Note that trailers in different libraries are not shared*
 
 ---
+# Feature Requests
+
+[![Feature Requests](http://feathub.com/Electronickss/TheaterTrailers?format=svg)](http://feathub.com/Electronickss/TheaterTrailers)
+
+---
 
 # Credit
 
