@@ -30,6 +30,8 @@ This is a python script that automates, downloading of trailers from youtube usi
     * *the config file is not currently working. For now, edit the script directly*
 8. Run manually like any other script.
     * *cron and windows task scheduler are currently untested but should work fine*
+9. Add a folder inside of the Movies libraries within Plex, to /directory/where/TheaterTrailers/Trailers/
+    * *Note that trailers in different libraries are not shared*
 
 ---
 
