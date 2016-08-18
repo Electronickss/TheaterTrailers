@@ -27,7 +27,7 @@ This is a python script that automates, downloading of trailers from youtube usi
 5. Sign up at Movie DB for an account and [get a personal api key](https://www.themoviedb.org/documentation/api)
 6. Clone this repository or download it where you want
 7. Edit the ~~config file~~ to include your api key, as well as the path to wherever you cloned/downloaded the repository. Adjust other settings as necessary
-    * *the config file is not currently working. For now, edit the script directly+*
+    * *the config file is not currently working. For now, edit the script directly*
 8. Run manually like any other script.
     * *cron and windows task scheduler are currently untested but should work fine*
 
