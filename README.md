@@ -7,7 +7,7 @@ This is a python script that automates, downloading of trailers from youtube usi
 
 # Screenshot
 
-![Plex Web View](http://i.imgur.com/BaH7En3.png)
+![Plex Web View](http://i.imgur.com/XkrrHFs.png)
 
 ---
 
