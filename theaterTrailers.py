@@ -20,18 +20,15 @@ config.read('theaterTrailers.cfg')
 
 # Config Varuables
 # Do not currently have the config working yet
-tmdb.API_KEY = 'Your Movie DB Key goes here'
+tmdb.API_KEY = '45218221359301cd0d5bdcde79441602'
 youtubePlaylist = 'https://www.youtube.com/playlist?list=PLScC8g4bqD47c-qHlsfhGH3j6Bg7jzFy-'
-TheaterTrailersHome = '/Path/To/TheaterTrailers/' #ex '/home/<user>/TheaterTrailers/', '/User/<user>/TheaterTrailers/' or 'C:\Users\<user>\TheaterTrailers'
+TheaterTrailersHome = '/opt/TheaterTrailers/' #ex '/home/<user>/TheaterTrailers/', '/User/<user>/TheaterTrailers/' or 'C:\Users\<user>\TheaterTrailers'
 quietVar = False
 playlistEndVar = 5
 pauseRate = .25
 
 # Sets the Current Date in ISO format
-year = '20' + time.strftime("%y")
-month = time.strftime("%m")
-day = time.strftime("%d")
-currentDate = year + '-' + month + '-' + day
+currentDate = time.strftime('%Y-%m-%d')
 
 
 # Main detirmines the flow of the module
@@ -41,26 +38,20 @@ def main():
   # Querries tmdb and updates the release date in the dictionary
   for item in MovieList:
     tmdbInfo(item)
+  
     for s in search.results:
       releaseDate = s['release_date']
       releaseDateList = releaseDate.split('-')
       if MovieDict[item]['Trailer Year'] == releaseDateList[0]:
-        # This logic could use some work
-        # If the result has already been updated into the dict, pass
-        # If it isn't there add it
-        try:
-          if MovieDict[item]['release_date'] in globals():
-            pass
-        except KeyError as e:
-          MovieDict[item].update({'release_date' : s['release_date']})
+        MovieDict[item]['release_date'] = releaseDate
+        break
   
   # Uses info from the MovieDict to send the movie to download. Checks if its been released yet here
   for movie in MovieList:
     try:
       if currentDate < MovieDict[movie]['release_date']:
         title = movie.strip()
-        trailerYear = MovieDict[movie]['Trailer Year']
-        trailerYear = trailerYear.strip()
+        trailerYear = MovieDict[movie]['Trailer Year'].strip()
         videoDownloader(MovieDict[movie]['url'], title, trailerYear)
     except KeyError as e:
       pass
@@ -82,7 +73,7 @@ def videoDownloader(string, passedTitle, yearVar):
       TheaterTrailersHome + 'Trailers/{0} ({1})/{0}-trailer.mp4'.format(passedTitle, yearVar)
       )
     shutil.copy2(
-      TheaterTrailersHome + 'res/poster.jpg',
+      'res/poster.jpg', 
       TheaterTrailersHome + 'Trailers/{0} ({1})/'.format(passedTitle, yearVar)
       )
 
@@ -102,7 +93,7 @@ def infoDownloader(playlist):
     info = ydl.extract_info(playlist)
 
   for x in info['entries']:
-    MovieVar = info['entries'][info['entries'].index(x)]['title']
+    MovieVar = x['title']
     MovieVar = MovieVar.replace(':', '')
     if 'Official' in MovieVar:
       regexedTitle = re.search('^.*(?=(Official))', MovieVar)
@@ -111,10 +102,9 @@ def infoDownloader(playlist):
       break
     trailerYear = re.search('(?<=\().*(?=\))', MovieVar)
     TempDict = { 'url' : info['entries'][info['entries'].index(x)]['webpage_url']}
-    movieTitle = regexedTitle.group(0)
-    movieTitle = movieTitle.strip()
-    MovieDict.update({movieTitle : TempDict})
-    MovieDict[movieTitle].update({'Trailer Year' : trailerYear.group(0)})
+    movieTitle = regexedTitle.group(0).strip()
+    MovieDict[movieTitle] = TempDict
+    MovieDict[movieTitle]['Trailer Year'] = trailerYear.group(0)
     MovieList.append(movieTitle)
 
 
@@ -130,12 +120,21 @@ def cleanup():
   dirsList = os.listdir(TheaterTrailersHome + 'Trailers/')
   for item in dirsList:
     dirsTitle = re.search('^.*(?=(\())', item)
-    dirsTitle = dirsTitle.group(0)
-    dirsTitle = dirsTitle.strip()
+    dirsTitle = dirsTitle.group(0).strip()
+    dirsYear = re.search('(?<=\().*(?=\))', item)
+    dirsYear = dirsYear.group(0).strip()
     s = tmdbInfo(dirsTitle)
-    if currentDate > s[0]['release_date']:
-      print currentDate + '>' + releaseDate
-      shutil.rmtree(TheaterTrailersHome + 'Trailers/{0} ({1})/'.format(dirsTitle, dirsYear))
+    for s in search.results:
+      releaseDate = s['release_date']
+      releaseDateList = releaseDate.split('-')
+      if dirsYear == releaseDateList[0]:
+        if releaseDate <= currentDate:
+          shutil.rmtree(TheaterTrailersHome + 'Trailers/{0} ({1})'.format(dirsTitle, dirsYear))
+      
+      else:
+        pass
+
+      break    
 
 
 if __name__ == "__main__":
