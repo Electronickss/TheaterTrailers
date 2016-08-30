@@ -69,6 +69,7 @@ def videoDownloader(string, passedTitle, yearVar):
   ydl1_opts = {
     'outtmpl': os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(passedTitle, yearVar), '{0}.mp4'.format(passedTitle)),
     'ignoreerrors': True,
+    'format': 'mp4',
   }
   with youtube_dl.YoutubeDL(ydl1_opts) as ydl:
     ydl.download([string])
