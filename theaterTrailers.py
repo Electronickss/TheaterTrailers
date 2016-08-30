@@ -67,19 +67,19 @@ def main():
 def videoDownloader(string, passedTitle, yearVar):
   # Options for the video downloader
   ydl1_opts = {
-    'outtmpl': TheaterTrailersHome + 'Trailers/{0} ({1})/{0}.mp4'.format(passedTitle, yearVar),
+    'outtmpl': os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(passedTitle, yearVar), '{0}.mp4'.format(passedTitle)),
     'ignoreerrors': True,
   }
   with youtube_dl.YoutubeDL(ydl1_opts) as ydl:
     ydl.download([string])
 #    logging.debug('TheaterTrailers downloaded {0} ({1})'.format(passedTitle, yearVar))
     shutil.copy2(
-      TheaterTrailersHome + 'Trailers/{0} ({1})/{0}.mp4'.format(passedTitle, yearVar),
-      TheaterTrailersHome + 'Trailers/{0} ({1})/{0}-trailer.mp4'.format(passedTitle, yearVar)
+      os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(passedTitle, yearVar), '{0}.mp4'.format(passedTitle)),
+      os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(passedTitle, yearVar), '{0}-trailer.mp4'.format(passedTitle))
       )
     shutil.copy2(
-      'res/poster.jpg', 
-      TheaterTrailersHome + 'Trailers/{0} ({1})/'.format(passedTitle, yearVar)
+      os.path.join('res', 'poster.jpg'), 
+      os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(passedTitle, yearVar))
       )
 
 
@@ -123,7 +123,7 @@ def tmdbInfo(item):
 
 # Gets a list of the movies in the directory and removes old movies
 def cleanup():
-  dirsList = os.listdir(TheaterTrailersHome + 'Trailers/')
+  dirsList = os.listdir(os.path.join(TheaterTrailersHome, 'Trailers'))
   for item in dirsList:
     dirsTitle = re.search('^.*(?=(\())', item)
     dirsTitle = dirsTitle.group(0).strip()
@@ -135,7 +135,7 @@ def cleanup():
       releaseDateList = releaseDate.split('-')
       if dirsYear == releaseDateList[0]:
         if releaseDate <= currentDate:
-          shutil.rmtree(TheaterTrailersHome + 'Trailers/{0} ({1})'.format(dirsTitle, dirsYear))
+          shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
       
       break    
 
