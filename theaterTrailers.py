@@ -106,7 +106,7 @@ def infoDownloader(playlist):
       regexedTitle = re.search('^.*(?=(Official))', MovieVar)
     # Throws out edge cases
     else:
-      break
+      continue
     trailerYear = re.search('(?<=\().*(?=\))', MovieVar)
     TempDict = { 'url' : info['entries'][info['entries'].index(x)]['webpage_url']}
     movieTitle = regexedTitle.group(0).strip()
