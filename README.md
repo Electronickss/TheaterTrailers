@@ -62,4 +62,5 @@ Vote on new features [here!](http://feathub.com/Electronickss/TheaterTrailers)
 Thank you to the [youtube-dl](https://github.com/rg3/youtube-dl) team
 
 This product uses the TMDb API but is not endorsed or certified by TMDb
+
 ---
