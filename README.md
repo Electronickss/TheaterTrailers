@@ -12,7 +12,7 @@ This application adds to the movie theater feel of your plex setup, by adding un
 
 # Screenshot
 
-![Plex Web View](http://i.imgur.com/XkrrHFs.png)
+![Plex Web View](http://i.imgur.com/uEwB02G.png)
 
 ---
 
@@ -47,6 +47,8 @@ This application adds to the movie theater feel of your plex setup, by adding un
 
 11. Enable trailers on your client
     * Plex Web: Set the number of trailers in  `Settings > Web > Player > Cinema Trailers to Play Before Movies`
+
+* *The first time this script runs it can take 15 minutes or longer to finish using the recommended settings*
 
 ---
 # Feature Requests
