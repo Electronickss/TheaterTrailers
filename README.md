@@ -12,19 +12,17 @@ This application adds to the movie theater feel of your plex setup, by adding un
 
 # Screenshot
 
-![Plex Web View](http://i.imgur.com/XkrrHFs.png)
+![Plex Web View](http://i.imgur.com/uEwB02G.png)
 
 ---
 
 # Installation
 
-*Please note, this module is currently only supported with Python 2.7.x systems. Python 3.x is currently under testing.*
 
 ### From withing your OS
 
-1. Install Python 2.7.x. 
+1. Install Python. This module now supports both 2.7.x and 3.x 
    * Python for Windows can be found [here](https://www.python.org/downloads/windows/)
-   * For all other OS's, check out [this stack overflow](http://stackoverflow.com/questions/1093322/how-do-i-check-what-version-of-python-is-running-my-script) to check what version your system is using
 2. Install PIP if it isn't already present
    * Check [this out](https://pip.pypa.io/en/stable/installing/) for help
 3. Install [youtube_dl](https://rg3.github.io/youtube-dl/index.html)
@@ -49,6 +47,8 @@ This application adds to the movie theater feel of your plex setup, by adding un
 
 11. Enable trailers on your client
     * Plex Web: Set the number of trailers in  `Settings > Web > Player > Cinema Trailers to Play Before Movies`
+
+* *The first time this script runs it can take 15 minutes or longer to finish using the recommended settings*
 
 ---
 # Feature Requests
