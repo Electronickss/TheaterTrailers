@@ -27,7 +27,6 @@ tmdb.API_KEY = ConfigSectionMap("Main")['tmdb_api_key']
 TheaterTrailersHome = ConfigSectionMap("Main")['theatertrailershome']
 playlistEndVar = int(ConfigSectionMap("Main")['playlistendvar'])
 youtubePlaylist = ConfigSectionMap("Main")['youtubeplaylist']
-logDir = ConfigSectionMap("Main")['logdir']
 runCleanup = ConfigSectionMap("Main")['runcleanup']
 trailerLocation = ConfigSectionMap("Main")['trailerlocation']
 cacheRefresh = int(ConfigSectionMap("Main")['cacherefresh'])
@@ -293,39 +292,42 @@ def checkFiles(title, year):
 
 # Gets a list of the movies in the directory and removes old movies
 def cleanup():
-  dirsList = os.listdir(os.path.join(TheaterTrailersHome, 'Trailers'))
-  for item in dirsList:
-    dirsTitle = re.search('^.*(?=(\())', item)
-    dirsTitle = dirsTitle.group(0).strip()
-    dirsYear = re.search('(?<=\().*(?=\))', item)
-    dirsYear = dirsYear.group(0).strip()
-    filePath = os.path.join(cacheDir, 'theaterTrailersCache.json')
-    '''
-    with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'a+') as fp:
-      try:
-        jsonDict = json.load(fp)
-        releaseDate = jsonDict[dirsTitle]['Release Date'].split('-')
-        if (dirsYear != releaseDate[0]):
-          logger.debug(dirsTitle + " has an old year attached to it")
-          shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
-      except KeyError as e:
-        logger.error(dirsTitle, e)
-        continue
-      except ValueError as Ve:
-    '''
-    if (os.path.isfile(filePath)):
-      with open(filePath, 'r') as fp:
+  if not os.path.isdir(os.path.join(TheaterTrailersHome, 'Trailers')):
+    return
+  else:
+    dirsList = os.listdir(os.path.join(TheaterTrailersHome, 'Trailers'))
+    for item in dirsList:
+      dirsTitle = re.search('^.*(?=(\())', item)
+      dirsTitle = dirsTitle.group(0).strip()
+      dirsYear = re.search('(?<=\().*(?=\))', item)
+      dirsYear = dirsYear.group(0).strip()
+      filePath = os.path.join(cacheDir, 'theaterTrailersCache.json')
+      '''
+      with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'a+') as fp:
         try:
-          data = json.load(fp)
-          releaseDate = data[dirsTitle]['Release Date']
-          if releaseDate <= currentDate:
-            logger.debug("Removing " + dirsTitle)
+          jsonDict = json.load(fp)
+          releaseDate = jsonDict[dirsTitle]['Release Date'].split('-')
+          if (dirsYear != releaseDate[0]):
+            logger.debug(dirsTitle + " has an old year attached to it")
             shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
-        except KeyError as ex:
-          shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
-          logger.debug("Removing " + dirsTitle)
+        except KeyError as e:
+          logger.error(dirsTitle, e)
+          continue
         except ValueError as Ve:
-          noCacheCleanup(dirsTitle, dirsYear)      
+      '''
+      if (os.path.isfile(filePath)):
+        with open(filePath, 'r') as fp:
+          try:
+            data = json.load(fp)
+            releaseDate = data[dirsTitle]['Release Date']
+            if releaseDate <= currentDate:
+              logger.debug("Removing " + dirsTitle)
+              shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
+          except KeyError as ex:
+            shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
+            logger.debug("Removing " + dirsTitle)
+          except ValueError as Ve:
+            noCacheCleanup(dirsTitle, dirsYear)      
 
     
 def noCacheCleanup(dirsTitle, dirsYear):
