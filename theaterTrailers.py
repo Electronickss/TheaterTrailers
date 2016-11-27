@@ -31,7 +31,10 @@ logDir = ConfigSectionMap("Main")['logdir']
 runCleanup = ConfigSectionMap("Main")['runcleanup']
 trailerLocation = ConfigSectionMap("Main")['trailerlocation']
 cacheRefresh = int(ConfigSectionMap("Main")['cacherefresh'])
-cacheDir = ConfigSectionMap("Main")['cachedir']
+cacheHome = ConfigSectionMap("Main")['theatertrailershome']
+cacheDir = os.path.join(cacheHome, "Cache")
+if not os.path.exists(cacheDir):
+  os.makedirs(cacheDir)
 
 # Pause in seconds. TMDB has a rate limit of 40 requests per 10 seconds
 pauseRate = .25
@@ -77,7 +80,9 @@ def main():
 
         except (KeyError, ValueError) as e:
           tmdbInfo(item)
-          for s in search.results:
+          tempList = search.results
+          tempList.reverse()
+          for s in tempList:
             releaseDate = s['release_date']
             releaseDateList = releaseDate.split('-')
             if MovieDict[item]['Trailer Release'] <= releaseDateList[0]:
@@ -92,9 +97,11 @@ def main():
     try:
       yearVar = MovieDict[item]['Release Date'].split('-')
       trailerYear = yearVar[0].strip()
+      updateCache(MovieDict[item]['url'], title, trailerYear)
     except KeyError as error:
-      logger.debug(str(item) + " is missing its release date")
-    updateCache(MovieDict[item]['url'], title, trailerYear)
+      print error
+      logger.debug("{0} is missing its release date".format(item))
+    
 
     
 
@@ -141,6 +148,7 @@ def updateCache(string, passedTitle, yearVar):
             else:
               logger.debug('{0} from {1} was in the cache but did not exist'.format(passedTitle, string))
               if yearVar == MovieDict[passedTitle]['Trailer Year']:
+                print 'here is the debugger'
                 videoDownloader(string,passedTitle,yearVar)
               else:
                 with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp1:
@@ -157,7 +165,7 @@ def updateCache(string, passedTitle, yearVar):
           with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp1:
             jsonDict[passedTitle]['url'] = string
             if checkDownloadDate(passedTitle):
-              shutil.remove(os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar)))
+              shutil.rmtree(os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar)))
               videoDownloader(string,passedTitle,yearVar)
               jsonDict[passedTitle]['status'] = 'Downloaded'
             else:
@@ -165,7 +173,7 @@ def updateCache(string, passedTitle, yearVar):
             json.dump(jsonDict, temp1, indent=4)
 
       except KeyError as e:
-        logger.debug('Creating New Entry', e)
+        logger.debug('Creating New Entry')
         with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp2:
           jsonDict[passedTitle] = MovieDict[passedTitle]
           if checkDownloadDate(passedTitle):
@@ -176,7 +184,7 @@ def updateCache(string, passedTitle, yearVar):
           json.dump(jsonDict, temp2, indent=4)
 
     except ValueError as e:
-      logger.debug('Creating Cache', e)
+      logger.debug('Creating Cache')
       jsonDict = {}
       jsonDict['Creation Date'] = currentDate
       jsonDict[passedTitle] = MovieDict[passedTitle]
@@ -250,7 +258,7 @@ def infoDownloader(playlist):
 def tmdbInfo(item):
   response = search.movie(query=item)
   logger.info("querying the movie db for {0}".format(item))
-  time.sleep(pauseRate) 
+  time.sleep(pauseRate)
   return search.results
   
 
@@ -292,6 +300,7 @@ def cleanup():
     dirsYear = re.search('(?<=\().*(?=\))', item)
     dirsYear = dirsYear.group(0).strip()
     filePath = os.path.join(cacheDir, 'theaterTrailersCache.json')
+    '''
     with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'a+') as fp:
       try:
         jsonDict = json.load(fp)
@@ -302,10 +311,12 @@ def cleanup():
       except KeyError as e:
         logger.error(dirsTitle, e)
         continue
+      except ValueError as Ve:
+    '''
     if (os.path.isfile(filePath)):
       with open(filePath, 'r') as fp:
-        data = json.load(fp)
         try:
+          data = json.load(fp)
           releaseDate = data[dirsTitle]['Release Date']
           if releaseDate <= currentDate:
             logger.debug("Removing " + dirsTitle)
@@ -313,17 +324,21 @@ def cleanup():
         except KeyError as ex:
           shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
           logger.debug("Removing " + dirsTitle)
-    else:      
-      s = tmdbInfo(dirsTitle)
-      for s in search.results:
-        releaseDate = s['release_date']
-        releaseDateList = releaseDate.split('-')
-        if dirsYear == releaseDateList[0]:
-          if releaseDate <= currentDate:
-            logger.debug("Removing " + dirsTitle)
-            shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
-        
-        break    
+        except ValueError as Ve:
+          noCacheCleanup(dirsTitle, dirsYear)      
+
+    
+def noCacheCleanup(dirsTitle, dirsYear):
+  s = tmdbInfo(dirsTitle)
+  for s in search.results:
+    releaseDate = s['release_date']
+    releaseDateList = releaseDate.split('-')
+    if dirsYear == releaseDateList[0]:
+      if releaseDate <= currentDate:
+        logger.debug("Removing " + dirsTitle)
+        shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
+    
+    break    
 
 
 if __name__ == "__main__":

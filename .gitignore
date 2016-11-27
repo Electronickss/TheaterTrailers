@@ -6,6 +6,10 @@ __pycache__/
 # Ignore conf
 trailers.conf
 
+# Ignore created folders
+Cache
+Trailers
+
 # C extensions
 *.so
 
