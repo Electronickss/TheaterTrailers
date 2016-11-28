@@ -30,8 +30,7 @@ youtubePlaylist = ConfigSectionMap("Main")['youtubeplaylist']
 runCleanup = ConfigSectionMap("Main")['runcleanup']
 trailerLocation = ConfigSectionMap("Main")['trailerlocation']
 cacheRefresh = int(ConfigSectionMap("Main")['cacherefresh'])
-cacheHome = ConfigSectionMap("Main")['theatertrailershome']
-cacheDir = os.path.join(cacheHome, "Cache")
+cacheDir = os.path.join(TheaterTrailersHome, "Cache")
 if not os.path.exists(cacheDir):
   os.makedirs(cacheDir)
 
@@ -50,7 +49,6 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 ch.setFormatter(formatter)
 logger.addHandler(ch)
-
 
 # Sets the Current Date in ISO format
 currentDate = time.strftime('%Y-%m-%d')
@@ -302,19 +300,6 @@ def cleanup():
       dirsYear = re.search('(?<=\().*(?=\))', item)
       dirsYear = dirsYear.group(0).strip()
       filePath = os.path.join(cacheDir, 'theaterTrailersCache.json')
-      '''
-      with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'a+') as fp:
-        try:
-          jsonDict = json.load(fp)
-          releaseDate = jsonDict[dirsTitle]['Release Date'].split('-')
-          if (dirsYear != releaseDate[0]):
-            logger.debug(dirsTitle + " has an old year attached to it")
-            shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
-        except KeyError as e:
-          logger.error(dirsTitle, e)
-          continue
-        except ValueError as Ve:
-      '''
       if (os.path.isfile(filePath)):
         with open(filePath, 'r') as fp:
           try:
