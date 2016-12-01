@@ -21,7 +21,7 @@ This application adds to the movie theater feel of your plex setup, by adding un
 
 ### From withing your OS
 
-1. Install Python. This module now supports both 2.7.x and 3.x 
+1. Install Python. This module supports 2.7.x. 3.x support can be spotty. Raise a github issue if you spot a compatibility error
    * Python for Windows can be found [here](https://www.python.org/downloads/windows/)
 2. Install PIP if it isn't already present
    * Check [this out](https://pip.pypa.io/en/stable/installing/) for help

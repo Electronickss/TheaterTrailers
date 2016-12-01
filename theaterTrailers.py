@@ -104,7 +104,7 @@ def main():
       trailerYear = yearVar[0].strip()
       updateCache(MovieDict[item]['url'], title, trailerYear)
     except KeyError as error:
-      print error
+      print(error)
       logger.debug("{0} is missing its release date".format(item))
     
 
