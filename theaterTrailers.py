@@ -10,6 +10,7 @@ import shutil
 import re
 import os
 import time
+import requests
 
 #Local Modules
 from ConfigMapper.configMapper import ConfigSectionMap
@@ -30,6 +31,9 @@ youtubePlaylist = ConfigSectionMap("Main")['youtubeplaylist']
 runCleanup = ConfigSectionMap("Main")['runcleanup']
 trailerLocation = ConfigSectionMap("Main")['trailerlocation']
 redBand = ConfigSectionMap("Main")['redband']
+plexHost = ConfigSectionMap("Main")['plexhost']
+plexPort = ConfigSectionMap("Main")['plexport']
+plexToken = ConfigSectionMap("Main")['plextoken']
 cacheRefresh = int(ConfigSectionMap("Main")['cacherefresh'])
 cacheDir = os.path.join(TheaterTrailersHome, "Cache")
 if not os.path.exists(cacheDir):
@@ -218,9 +222,9 @@ def videoDownloader(string, passedTitle, yearVar):
         os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
         os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
       )
+    updatePlex()
 
-  
-      
+
 # Downloads info for the videos from the playlist
 def infoDownloader(playlist):
   # Options for the info downloader
@@ -259,6 +263,11 @@ def infoDownloader(playlist):
     MovieList.append(movieTitle)
 
 
+def updatePlex():
+  r = requests.get('http://{0}:{1}/library/sections/1/refresh?X-Plex-Token={2}'.format(plexHost, plexPort, plexToken))
+  if r.status_code != 200:
+    logger.warning("The plex server at {0}:{1} did not respond correctly to the request".format(plexHost, plexPort))
+
 # Returns results from tmdb
 def tmdbInfo(item):
   response = search.movie(query=item)
@@ -274,11 +283,13 @@ def checkFiles(title, year):
         os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1}).mp4'.format(title, year)),
         os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1})-trailer.mp4'.format(title, year))
       )
+      updatePlex()
     if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), 'poster.jpg')):
       shutil.copy2(
         os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
         os.path.join(trailerLocation, '{0} ({1})'.format(title, year))
       )
+      updatePlex()
     return True
   if os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1})-trailer.mp4'.format(title, year))):
     if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1}).mp4'.format(title, year))):
@@ -286,11 +297,13 @@ def checkFiles(title, year):
         os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1})-trailer.mp4'.format(title, year)),
         os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1}).mp4'.format(title, year))
       )
+      updatePlex()
     if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), 'poster.jpg')):
       shutil.copy2(
         os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
         os.path.join(trailerLocation, '{0} ({1})'.format(title, year))
       )
+      updatePlex()
     return True
   else:
     return False
@@ -316,9 +329,11 @@ def cleanup():
             if releaseDate <= currentDate:
               logger.debug("Removing " + dirsTitle)
               shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
+              updatePlex()
           except KeyError as ex:
-            shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
             logger.debug("Removing " + dirsTitle)
+            shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
+            updatePlex()
           except ValueError as Ve:
             noCacheCleanup(dirsTitle, dirsYear)      
 
@@ -332,6 +347,7 @@ def noCacheCleanup(dirsTitle, dirsYear):
       if releaseDate <= currentDate:
         logger.debug("Removing " + dirsTitle)
         shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
+        updatePlex()
     
     break    
 
