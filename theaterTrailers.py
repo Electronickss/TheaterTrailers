@@ -82,14 +82,17 @@ def main():
           for s in tempList:
             releaseDate = s['release_date']
             releaseDateList = releaseDate.split('-')
-            if MovieDict[item]['Trailer Release'] <= releaseDateList[0]:
-              MovieDict[item]['Release Date'] = releaseDate
+            try:
+              if (int(releaseDateList[0]) - 1) <= int(MovieDict[item]['Trailer Release']) <= (int(releaseDateList[0]) + 1):
+                MovieDict[item]['Release Date'] = releaseDate
+            except ValueError:
+              pass
 
         except AttributeError as ae1:
-          logger.error(item, ae1, "AttributeError")
+          logger.error("{0}, AttributeError".format(item))
           continue
-  
-  # Adds the movies to the cache
+
+    # Adds the movies to the cache
     title = item.strip()
     try:
       yearVar = MovieDict[item]['Release Date'].split('-')
@@ -145,7 +148,6 @@ def updateCache(string, passedTitle, yearVar):
             else:
               logger.debug('{0} from {1} was in the cache but did not exist'.format(passedTitle, string))
               if yearVar == MovieDict[passedTitle]['Trailer Year']:
-                print 'here is the debugger'
                 videoDownloader(string,passedTitle,yearVar)
               else:
                 with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp1:
@@ -200,7 +202,7 @@ def updateCache(string, passedTitle, yearVar):
 def videoDownloader(string, passedTitle, yearVar):
   # Options for the video downloader
   ydl1_opts = {
-    'outtmpl': os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(passedTitle, yearVar), '{0}.mp4'.format(passedTitle)),
+    'outtmpl': os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(passedTitle, yearVar), '{0} ({1}).mp4'.format(passedTitle, yearVar)),
     'ignoreerrors': True,
     'format': 'mp4',
   }
@@ -208,8 +210,8 @@ def videoDownloader(string, passedTitle, yearVar):
     logger.info("downloading {0} from {1}".format(passedTitle, string))
     ydl.download([string])
     shutil.copy2(
-        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0}.mp4'.format(passedTitle)),
-        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0}-trailer.mp4'.format(passedTitle))
+        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0} ({1}).mp4'.format(passedTitle, yearVar)),
+        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0} ({1})-trailer.mp4'.format(passedTitle, yearVar))
       )
     shutil.copy2(
         os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
@@ -235,10 +237,12 @@ def infoDownloader(playlist):
     info = ydl.extract_info(playlist)
 
   for x in info['entries']:
-    MovieVar = x['title']
+    MovieVar = x['title'].encode('ascii',errors='ignore')
     MovieVar = MovieVar.replace(':', '')
     if 'Official' in MovieVar:
       regexedTitle = re.search('^.*(?=(Official))', MovieVar)
+    elif 'Star Wars' in MovieVar:
+      regexedTitle = re.search('.*?(?=Trailer)', MovieVar)
     # Throws out edge cases
     else:
       continue
