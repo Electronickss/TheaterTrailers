@@ -29,6 +29,7 @@ playlistEndVar = int(ConfigSectionMap("Main")['playlistendvar'])
 youtubePlaylist = ConfigSectionMap("Main")['youtubeplaylist']
 runCleanup = ConfigSectionMap("Main")['runcleanup']
 trailerLocation = ConfigSectionMap("Main")['trailerlocation']
+redBand = ConfigSectionMap("Main")['redband']
 cacheRefresh = int(ConfigSectionMap("Main")['cacherefresh'])
 cacheDir = os.path.join(TheaterTrailersHome, "Cache")
 if not os.path.exists(cacheDir):
@@ -235,16 +236,19 @@ def infoDownloader(playlist):
   }
   with youtube_dl.YoutubeDL(ydl_opts) as ydl:
     info = ydl.extract_info(playlist)
-
+  
   for x in info['entries']:
     MovieVar = x['title'].encode('ascii',errors='ignore')
     MovieVar = MovieVar.replace(':', '')
     if 'Official' in MovieVar:
       regexedTitle = re.search('^.*(?=(Official))', MovieVar)
-    elif 'Star Wars' in MovieVar:
+    elif [e for e in MovieList if e in MovieVar]:
       regexedTitle = re.search('.*?(?=Trailer)', MovieVar)
-    # Throws out edge cases
+    elif redBand == True:
+      if 'Red Band' in MovieVar:
+        regexedTitle = re.search('.*?(?=Red)', MovieVar)
     else:
+      # Throws out edge cases
       continue
     trailerYear = re.search('(?<=\().*(?=\))', MovieVar)
     TempDict = { 'url' : info['entries'][info['entries'].index(x)]['url']}
@@ -264,28 +268,28 @@ def tmdbInfo(item):
   
 
 def checkFiles(title, year):
-  if os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0}.mp4'.format(title))):
-    if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0}-trailer.mp4'.format(title))):
+  if os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1}).mp4'.format(title, year))):
+    if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1})-trailer.mp4'.format(title, year))):
       shutil.copy2(
-        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0}.mp4'.format(passedTitle)),
-        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0}-trailer.mp4'.format(passedTitle))
+        os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1}).mp4'.format(title, year)),
+        os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1})-trailer.mp4'.format(title, year))
       )
     if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), 'poster.jpg')):
       shutil.copy2(
         os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
-        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
+        os.path.join(trailerLocation, '{0} ({1})'.format(title, year))
       )
     return True
-  if os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0}-trailer.mp4'.format(title))):
-    if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0}.mp4'.format(title))):
+  if os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1})-trailer.mp4'.format(title, year))):
+    if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1}).mp4'.format(title, year))):
       shutil.copy2(
-        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0}-trailer.mp4'.format(passedTitle)),
-        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0}.mp4'.format(passedTitle))
+        os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1})-trailer.mp4'.format(title, year)),
+        os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1}).mp4'.format(title, year))
       )
     if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), 'poster.jpg')):
       shutil.copy2(
         os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
-        os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
+        os.path.join(trailerLocation, '{0} ({1})'.format(title, year))
       )
     return True
   else:
