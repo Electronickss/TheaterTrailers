@@ -9,7 +9,8 @@ python:
 
 # command to install dependencies
 install:
-  - "pip install ."
+  - "pip install tmdbsimple"
+  - "pip install youtube-dl"
   - "pip install -r requirements.txt"
 # command to run tests
 script: pytest
