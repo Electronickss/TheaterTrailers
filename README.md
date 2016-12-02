@@ -1,3 +1,6 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/5dbghrb2g2x2dt8o?svg=true)](https://ci.appveyor.com/project/Electronickss/theatertrailers)
+
+
 ---
 # TheaterTrailers
 
