@@ -11,5 +11,7 @@ python:
 install:
   - "pip install tmdbsimple"
   - "pip install youtube-dl"
+  - "pip install nose"
+  - "pip install coverage"
 # command to run tests
-script: pytest
+script: nosetests
