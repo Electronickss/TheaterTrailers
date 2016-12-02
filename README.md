@@ -1,5 +1,5 @@
 # TheaterTrailers
-[![Build status](https://ci.appveyor.com/api/projects/status/5dbghrb2g2x2dt8o?svg=true)](https://ci.appveyor.com/project/Electronickss/theatertrailers)
+[![Build status](https://ci.appveyor.com/api/projects/status/5dbghrb2g2x2dt8o?svg=true)](https://ci.appveyor.com/project/Electronickss/theatertrailers) [![Build Status](https://travis-ci.org/Electronickss/TheaterTrailers.svg?branch=master)](https://travis-ci.org/Electronickss/TheaterTrailers)
 
 This is a python script that automates the downloading of trailers from youtube using youtube-dl. Trailers are downloaded if their release date hasn't arrived yet and are deleted when it does. Files and folders are named with the standard Plex and The Movie DB naming convention, a "Coming Soon" image is copied in as `poster.jpg` and two versions of the trailer are stored. One is stored with `-trailer` in the name so Plex recognizes it as the trailer and the other is recognized as the movie.
 
