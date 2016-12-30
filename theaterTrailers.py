@@ -24,14 +24,13 @@ ResultsDict = {}
 search = tmdb.Search()
 
 # Sets the directory TheaterTrailers is running from
-dir_path = os.path.dirname(os.path.realpath(__file__))
+TheaterTrailersHome = os.path.dirname(os.path.realpath(__file__))
 
 # Sets the location of the trailers.conf file
-configfile = os.path.join(dir_path, 'Config', 'trailers.conf')
+configfile = os.path.join(TheaterTrailersHome, 'Config', 'trailers.conf')
 
 # Config Variables
 tmdb.API_KEY = ConfigSectionMap("main", configfile)['tmdb_api_key']
-TheaterTrailersHome = ConfigSectionMap("main", configfile)['theatertrailershome']
 playlistEndVar = int(ConfigSectionMap("main", configfile)['playlistendvar'])
 youtubePlaylist = ConfigSectionMap("main", configfile)['youtubeplaylist']
 runCleanup = ConfigSectionMap("main", configfile)['runcleanup']
