@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # Ignore conf
-trailers.conf
+Config/trailers.conf
 
 # Ignore created folders
 Cache

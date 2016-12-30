@@ -22,7 +22,12 @@ MovieList = []
 DirsDict = {}
 ResultsDict = {}
 search = tmdb.Search()
-configfile = '/opt/TheaterTrailers/trailers.conf'
+
+# Sets the directory TheaterTrailers is running from
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+# Sets the location of the trailers.conf file
+configfile = os.path.join(dir_path, 'Config', 'trailers.conf')
 
 # Config Variables
 tmdb.API_KEY = ConfigSectionMap("main", configfile)['tmdb_api_key']
