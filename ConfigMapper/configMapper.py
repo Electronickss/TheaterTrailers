@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import os
 try:
   import configparser
   Config = configparser.ConfigParser()
@@ -8,10 +9,8 @@ except ImportError:
   Config = ConfigParser.ConfigParser()
 
 
-Config.read('trailers.conf')
-
-
-def ConfigSectionMap(section):
+def ConfigSectionMap(section, conf):
+    Config.read(os.path.join(conf))
     dict1 = {}
     options = Config.options(section)
     for option in options:

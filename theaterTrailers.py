@@ -22,19 +22,20 @@ MovieList = []
 DirsDict = {}
 ResultsDict = {}
 search = tmdb.Search()
+configfile = '/opt/TheaterTrailers/trailers.conf'
 
 # Config Variables
-tmdb.API_KEY = ConfigSectionMap("Main")['tmdb_api_key']
-TheaterTrailersHome = ConfigSectionMap("Main")['theatertrailershome']
-playlistEndVar = int(ConfigSectionMap("Main")['playlistendvar'])
-youtubePlaylist = ConfigSectionMap("Main")['youtubeplaylist']
-runCleanup = ConfigSectionMap("Main")['runcleanup']
-trailerLocation = ConfigSectionMap("Main")['trailerlocation']
-redBand = ConfigSectionMap("Main")['redband']
-plexHost = ConfigSectionMap("Main")['plexhost']
-plexPort = ConfigSectionMap("Main")['plexport']
-plexToken = ConfigSectionMap("Main")['plextoken']
-cacheRefresh = int(ConfigSectionMap("Main")['cacherefresh'])
+tmdb.API_KEY = ConfigSectionMap("main", configfile)['tmdb_api_key']
+TheaterTrailersHome = ConfigSectionMap("main", configfile)['theatertrailershome']
+playlistEndVar = int(ConfigSectionMap("main", configfile)['playlistendvar'])
+youtubePlaylist = ConfigSectionMap("main", configfile)['youtubeplaylist']
+runCleanup = ConfigSectionMap("main", configfile)['runcleanup']
+trailerLocation = ConfigSectionMap("main", configfile)['trailerlocation']
+redBand = ConfigSectionMap("main", configfile)['redband']
+plexHost = ConfigSectionMap("main", configfile)['plexhost']
+plexPort = ConfigSectionMap("main", configfile)['plexport']
+plexToken = ConfigSectionMap("main", configfile)['plextoken']
+cacheRefresh = int(ConfigSectionMap("main", configfile)['cacherefresh'])
 cacheDir = os.path.join(TheaterTrailersHome, "Cache")
 if not os.path.exists(cacheDir):
   os.makedirs(cacheDir)
