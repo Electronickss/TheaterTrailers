@@ -54,7 +54,11 @@ pauseRate = .25
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-fh = logging.FileHandler(os.path.join(TheaterTrailersHome, 'theaterTrailers.log'))
+if not os.path.isdir(os.path.join(TheaterTrailersHome, 'Logs')):
+  os.makedirs(os.path.join(TheaterTrailersHome, 'Logs'))
+if os.path.isfile(os.path.join(TheaterTrailersHome, 'theaterTrailers.log')):
+  shutil.move(os.path.join(TheaterTrailersHome, 'theaterTrailers.log'), os.path.join(TheaterTrailersHome, 'Logs', 'theaterTrailers.log')) 
+fh = logging.FileHandler(os.path.join(TheaterTrailersHome, 'Logs', 'theaterTrailers.log'))
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
@@ -98,7 +102,8 @@ def main():
             try:
               if (int(releaseDateList[0]) - 1) <= int(MovieDict[item]['Trailer Release']) <= (int(releaseDateList[0]) + 1):
                 MovieDict[item]['Release Date'] = releaseDate
-            except ValueError:
+            except ValueError as e:
+              logger.error(e)
               pass
 
         except AttributeError as ae1:
@@ -112,8 +117,8 @@ def main():
       trailerYear = yearVar[0].strip()
       updateCache(MovieDict[item]['url'], title, trailerYear)
     except KeyError as error:
-      print(error)
-      logger.debug("{0} is missing its release date".format(item))
+      logger.info(error)
+      logger.info("{0} is missing its release date".format(item))
     
 
     
@@ -133,7 +138,8 @@ def checkCashe():
               os.remove(os.path.join(cacheDir, 'theaterTrailersCache.json'))
 
           except ValueError as e:
-            logger.debug("Cache file empty")
+            logger.info(e)
+            logger.info("Cache file empty")
 
     else:
       logger.info("making cache dir")
@@ -145,6 +151,7 @@ def checkDownloadDate(passedTitle):
     if currentDate < MovieDict[passedTitle]['Release Date']:
       return True
   except KeyError as ke2:
+    logger.error(ke2)
     logger.error(MovieDict[passedTitle] + " has no release date")
 
 
@@ -185,7 +192,8 @@ def updateCache(string, passedTitle, yearVar):
             json.dump(jsonDict, temp1, indent=4)
 
       except KeyError as e:
-        logger.debug('Creating New Entry')
+        logger.info(e)
+        logger.info('Creating New Entry')
         with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp2:
           jsonDict[passedTitle] = MovieDict[passedTitle]
           if checkDownloadDate(passedTitle):
@@ -196,7 +204,8 @@ def updateCache(string, passedTitle, yearVar):
           json.dump(jsonDict, temp2, indent=4)
 
     except ValueError as e:
-      logger.debug('Creating Cache')
+      logger.info(e)
+      logger.info('Creating Cache')
       jsonDict = {}
       jsonDict['Creation Date'] = currentDate
       jsonDict[passedTitle] = MovieDict[passedTitle]
@@ -342,10 +351,12 @@ def cleanup():
               shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
               updatePlex()
           except KeyError as ex:
-            logger.debug("Removing " + dirsTitle)
+            logger.info(ex)
+            logger.info("Removing " + dirsTitle)
             shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
             updatePlex()
           except ValueError as Ve:
+            logger.warning(Ve)
             noCacheCleanup(dirsTitle, dirsYear)      
 
     
