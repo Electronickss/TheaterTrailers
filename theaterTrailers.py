@@ -87,7 +87,7 @@ def main():
       if MovieDict['item']['Release Date'] in MovieDict:
         continue
     except KeyError as ke1:
-      with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'a+') as fp:
+      with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r+') as fp:
         try:
           DB_Dict = json.load(fp)
           MovieDict[item]['Release Date'] = DB_Dict[item]['Release Date']
@@ -156,7 +156,7 @@ def checkDownloadDate(passedTitle):
 
 
 def updateCache(string, passedTitle, yearVar):
-  with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'a+') as fp:
+  with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r+') as fp:
     try:
       jsonDict = json.load(fp)
       try:
