@@ -42,6 +42,7 @@ redBand = ConfigSectionMap("main", configfile)['redband']
 plexHost = ConfigSectionMap("main", configfile)['plexhost']
 plexPort = ConfigSectionMap("main", configfile)['plexport']
 plexToken = ConfigSectionMap("main", configfile)['plextoken']
+loggingLevel = ConfigSectionMap("main", configfile)['logginglevel']
 cacheRefresh = int(ConfigSectionMap("main", configfile)['cacherefresh'])
 cacheDir = os.path.join(TheaterTrailersHome, "Cache")
 if not os.path.exists(cacheDir):
@@ -92,7 +93,7 @@ def main():
       with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r+') as fp:
         try:
           DB_Dict = json.load(fp)
-          MovieDict[item]['Release Date'] = DB_Dict[item]['Release Date']
+          MovieDict[item]['Release Date'] = DB_Dict[keymaker(item)]['Release Date']
 
         except (KeyError, ValueError) as e:
           tmdbInfo(item)
@@ -105,11 +106,11 @@ def main():
               if (int(releaseDateList[0]) - 1) <= int(MovieDict[item]['Trailer Release']) <= (int(releaseDateList[0]) + 1):
                 MovieDict[item]['Release Date'] = releaseDate
             except ValueError as e:
-              logger.error(e)
+              logger.error("ValueError {0}".format(e))
               pass
 
         except AttributeError as ae1:
-          logger.error("{0}, AttributeError".format(item))
+          logger.error("AttributeError {0}".format(item))
           continue
 
     # Adds the movies to the cache
@@ -119,7 +120,7 @@ def main():
       trailerYear = yearVar[0].strip()
       updateCache(MovieDict[item]['url'], title, trailerYear)
     except KeyError as error:
-      logger.info(error)
+      logger.info("KeyError {0}".format(error))
       logger.info("{0} is missing its release date".format(item))
     
 
@@ -140,7 +141,7 @@ def checkCashe():
               os.remove(os.path.join(cacheDir, 'theaterTrailersCache.json'))
 
           except ValueError as e:
-            logger.info(e)
+            logger.info("ValueError {0}".format(e))
             logger.info("Cache file empty")
 
     else:
@@ -153,14 +154,15 @@ def checkDownloadDate(passedTitle):
     if currentDate < MovieDict[passedTitle]['Release Date']:
       return True
   except KeyError as ke2:
-    logger.error(ke2)
+    logger.error("KeyError {0}".format(ke2))
     logger.error(MovieDict[passedTitle] + " has no release date")
 
 def keymaker(string):
   string = string.replace(" ", "")
   string = string.replace("'", "")
+  string = string.replace(".", "")
+  string = string.replace("-", "")
   string = string.lower()
-  print string
   return string
 
 def updateCache(string, passedTitle, yearVar):
@@ -356,14 +358,14 @@ def cleanup():
         with open(filePath, 'r') as fp:
           try:
             data = json.load(fp)
-            releaseDate = data[dirsTitle]['Release Date']
+            releaseDate = data[keymaker(dirsTitle)]['Release Date']
             if releaseDate <= currentDate:
-              logger.debug("Removing " + dirsTitle)
+              logger.info("Removing {0}. Release date has passed".format(dirsTitle))
               shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
               updatePlex()
           except KeyError as ex:
             logger.info(ex)
-            logger.info("Removing " + dirsTitle)
+            logger.info("Removing {0}".format(dirsTitle))
             shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
             updatePlex()
           except ValueError as Ve:
