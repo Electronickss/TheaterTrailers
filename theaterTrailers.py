@@ -46,6 +46,8 @@ cacheRefresh = int(ConfigSectionMap("main", configfile)['cacherefresh'])
 cacheDir = os.path.join(TheaterTrailersHome, "Cache")
 if not os.path.exists(cacheDir):
   os.makedirs(cacheDir)
+if not os.path.isfile(os.path.join(cacheDir, 'theaterTrailersCache.json')):
+  open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'w').close()
 
 # Pause in seconds. TMDB has a rate limit of 40 requests per 10 seconds
 pauseRate = .25
