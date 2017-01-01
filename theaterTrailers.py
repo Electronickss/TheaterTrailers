@@ -156,14 +156,21 @@ def checkDownloadDate(passedTitle):
     logger.error(ke2)
     logger.error(MovieDict[passedTitle] + " has no release date")
 
+def keymaker(string):
+  string = string.replace(" ", "")
+  string = string.replace("'", "")
+  string = string.lower()
+  print string
+  return string
 
 def updateCache(string, passedTitle, yearVar):
+  passedSmallTitle = keymaker(passedTitle)
   with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r+') as fp:
     try:
       jsonDict = json.load(fp)
       try:
-        if jsonDict[passedTitle]['url'] == string:
-          if jsonDict[passedTitle]['status'] == 'Downloaded':
+        if jsonDict[passedSmallTitle]['url'] == string:
+          if jsonDict[passedSmallTitle]['status'] == 'Downloaded':
             if checkFiles(passedTitle, yearVar):
               logger.debug('{0} from {1} is already downloaded'.format(passedTitle, string))
               return
@@ -173,36 +180,37 @@ def updateCache(string, passedTitle, yearVar):
                 videoDownloader(string,passedTitle,yearVar)
               else:
                 with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp1:
-                  jsonDict[passedTitle]['Trailer Year'] = MovieDict[passedTitle]['Trailer Year']
+                  jsonDict[passedSmallTitle]['Trailer Year'] = MovieDict[passedTitle]['Trailer Year']
                   videoDownloader(string,passedTitle,MovieDict[passedTitle]['Trailer Year'])
                   json.dump(jsonDict, temp1, indent=4)
-          elif jsonDict[passedTitle]['status'] == 'Released':
+          elif jsonDict[passedSmallTitle]['status'] == 'Released':
             logger.debug('{0} from {1} has been released'.format(passedTitle, string))
             return
           else:
             logger.error('error with {0} from {1}'.format(passedTitle, string))
         else:
-          logger.debug('New trailer for ' + passedTitle)
+          logger.debug('New trailer for {0}'.format(passedTitle))
           with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp1:
-            jsonDict[passedTitle]['url'] = string
+            jsonDict[passedSmallTitle]['url'] = string
             if checkDownloadDate(passedTitle):
-              shutil.rmtree(os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar)))
-              videoDownloader(string,passedTitle,yearVar)
-              jsonDict[passedTitle]['status'] = 'Downloaded'
+              shutil.rmtree(jsonDict[passedSmallTitle]['path'])
+              videoDownloader(string, jsonDict[passedSmallTitle]['Movie Title'], yearVar)
+              jsonDict[passedSmallTitle]['status'] = 'Downloaded'
             else:
-              jsonDict[passedTitle]['status'] = 'Released'
+              jsonDict[passedSmallTitle]['status'] = 'Released'
             json.dump(jsonDict, temp1, indent=4)
 
       except KeyError as e:
         logger.info(e)
         logger.info('Creating New Entry')
         with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp2:
-          jsonDict[passedTitle] = MovieDict[passedTitle]
+          jsonDict[passedSmallTitle] = MovieDict[passedTitle]
+          jsonDict[passedSmallTitle]['path'] = os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
           if checkDownloadDate(passedTitle):
             videoDownloader(string,passedTitle,yearVar)
-            jsonDict[passedTitle]['status'] = 'Downloaded'
+            jsonDict[passedSmallTitle]['status'] = 'Downloaded'
           else:
-            jsonDict[passedTitle]['status'] = 'Released'
+            jsonDict[passedSmallTitle]['status'] = 'Released'
           json.dump(jsonDict, temp2, indent=4)
 
     except ValueError as e:
@@ -210,12 +218,13 @@ def updateCache(string, passedTitle, yearVar):
       logger.info('Creating Cache')
       jsonDict = {}
       jsonDict['Creation Date'] = currentDate
-      jsonDict[passedTitle] = MovieDict[passedTitle]
+      jsonDict[passedSmallTitle] = MovieDict[passedTitle]
+      jsonDict[passedSmallTitle]['path'] = os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
       if checkDownloadDate(passedTitle):
-        videoDownloader(string,passedTitle,yearVar)
-        jsonDict[passedTitle]['status'] = 'Downloaded'
+        videoDownloader(string, passedTitle, yearVar)
+        jsonDict[passedSmallTitle]['status'] = 'Downloaded'
       else:
-        jsonDict[passedTitle]['status'] = 'Released'
+        jsonDict[passedSmallTitle]['status'] = 'Released'
         json.dump(jsonDict, fp, indent=4)
 
   if os.path.isfile(os.path.join(cacheDir, 'theaterTrailersTempCache.json')):
@@ -283,7 +292,7 @@ def infoDownloader(playlist):
 
 
 def updatePlex():
-  if plexHost == "":
+  if plexHost == "" or plexPort == "" or plexToken == "":
     return
   else:
     r = requests.get('http://{0}:{1}/library/sections/1/refresh?X-Plex-Token={2}'.format(plexHost, plexPort, plexToken))
