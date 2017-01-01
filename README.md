@@ -31,10 +31,10 @@ This application adds to the movie theater feel of your plex setup, by adding un
    * `pip install tmdbsimple`
 5. Sign up at Movie DB for an account and [get a personal api key](https://www.themoviedb.org/documentation/api)
    * A walk through can be found [here](https://github.com/Electronickss/TheaterTrailers/wiki/Signing-up-for-a-TMDB-API-Key)
-6. Get your Plex token off of Plex Web
+6. *(Optional)* Get your Plex token off of Plex Web
 7. Clone this repository or download it where you want it
    * git clone suggested
-8. Edit the config file to include your api key and the path to where you cloned/downloaded the repository. Remove `example` from the `trailers.conf` file title. Adjust other settings as necessary
+8. Edit the config file to include your api keys. Remove `example` from the `trailers.conf` file title. Adjust other settings as necessary
 9. This script can be ran manually like any other script or configured with Cron/Windows Task Scheduler.
    * Cron examples can be found [here](https://github.com/Electronickss/TheaterTrailers/wiki/Cron-Examples)
 
@@ -49,7 +49,7 @@ This application adds to the movie theater feel of your plex setup, by adding un
 12. Enable trailers on your client
     * Plex Web: Set the number of trailers in  `Settings > Web > Player > Cinema Trailers to Play Before Movies`
 
-13. **Optional**. TheaterTrailers copies over a "Coming Soon" poster so that users know it's a trailer. For that to be set to default, local media assets needs to be set as priority within your agents. Go to `Settings > Server > Agents` then adjust within each agent
+13. *(Optional)* TheaterTrailers copies over a "Coming Soon" poster so that users know it's a trailer. For that to be set to default, local media assets needs to be set as priority within your agents. Go to `Settings > Server > Agents` then adjust within each agent
 
 ---
 # Feature Requests
