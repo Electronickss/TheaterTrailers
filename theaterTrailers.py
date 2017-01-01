@@ -34,7 +34,10 @@ tmdb.API_KEY = ConfigSectionMap("main", configfile)['tmdb_api_key']
 playlistEndVar = int(ConfigSectionMap("main", configfile)['playlistendvar'])
 youtubePlaylist = ConfigSectionMap("main", configfile)['youtubeplaylist']
 runCleanup = ConfigSectionMap("main", configfile)['runcleanup']
-trailerLocation = ConfigSectionMap("main", configfile)['trailerlocation']
+if ConfigSectionMap("main", configfile)['trailerlocation'] == "":
+  trailerLocation = os.path.join(TheaterTrailersHome, 'Trailers')
+else:
+  trailerLocation = ConfigSectionMap("main", configfile)['trailerlocation']
 redBand = ConfigSectionMap("main", configfile)['redband']
 plexHost = ConfigSectionMap("main", configfile)['plexhost']
 plexPort = ConfigSectionMap("main", configfile)['plexport']
@@ -251,7 +254,7 @@ def infoDownloader(playlist):
     MovieVar = MovieVar.replace(':', '')
     if 'Official' in MovieVar:
       regexedTitle = re.search('^.*(?=(Official))', MovieVar)
-    elif [e for e in MovieList if e in MovieVar]:
+    elif 'Trailer' in MovieVar:
       regexedTitle = re.search('.*?(?=Trailer)', MovieVar)
     elif redBand == True:
       if 'Red Band' in MovieVar:
@@ -269,9 +272,12 @@ def infoDownloader(playlist):
 
 
 def updatePlex():
-  r = requests.get('http://{0}:{1}/library/sections/1/refresh?X-Plex-Token={2}'.format(plexHost, plexPort, plexToken))
-  if r.status_code != 200:
-    logger.warning("The plex server at {0}:{1} did not respond correctly to the request".format(plexHost, plexPort))
+  if plexHost == "":
+    return
+  else:
+    r = requests.get('http://{0}:{1}/library/sections/1/refresh?X-Plex-Token={2}'.format(plexHost, plexPort, plexToken))
+    if r.status_code != 200:
+      logger.warning("The plex server at {0}:{1} did not respond correctly to the request".format(plexHost, plexPort))
 
 # Returns results from tmdb
 def tmdbInfo(item):
