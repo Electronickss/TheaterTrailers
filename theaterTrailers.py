@@ -43,6 +43,12 @@ plexHost = ConfigSectionMap("main", configfile)['plexhost']
 plexPort = ConfigSectionMap("main", configfile)['plexport']
 plexToken = ConfigSectionMap("main", configfile)['plextoken']
 loggingLevel = ConfigSectionMap("main", configfile)['logginglevel']
+couchPotatoHost = ConfigSectionMap("main", configfile)['couchpotatohost']
+couchPotatoPort = ConfigSectionMap("main", configfile)['couchpotatoport']
+couchPotatoKey = ConfigSectionMap("main", configfile)['couchpotatokey']
+pushToCP = ConfigSectionMap("main", configfile)['pushtocp']
+pullFromCp = ConfigSectionMap("main", configfile)['pullfromcp']
+couchPotatoURI = ConfigSectionMap("main", configfile)['couchpotatouri']
 cacheRefresh = int(ConfigSectionMap("main", configfile)['cacherefresh'])
 cacheDir = os.path.join(TheaterTrailersHome, "Cache")
 if not os.path.exists(cacheDir):
@@ -123,7 +129,23 @@ def main():
       logger.warning("{0} is missing its release date".format(item))
     
 
-    
+def getImdbID(title, year):
+  r = requests.get('http://www.omdbapi.com/?t={0}&y={1}&plot=short&r=json'.format(title, year))
+  if r.status_code != 200:
+    logger.warning("Could not reach the omdbapi correctly")
+  else:
+    data = json.loads(r.text)
+    return data["imdbID"]
+
+
+def addToCouchPotato(imdbKey):
+  if couchPotatoKey == "" or couchPotatoHost == "" or couchPotatoPort == "":
+    return
+  elif pushToCP == False:
+    return
+  else:
+    r = requests.get('http://{0}:{1}/{2}api/{3}/movie.add/?identifier="{4}"'.format(couchPotatoHost, couchPotatoPort, couchPotatoURI, couchPotatoKey, imdbKey))
+
 
 def checkCashe():
     if os.path.exists(cacheDir):
@@ -172,6 +194,7 @@ def keymaker(string):
 
 def updateCache(string, passedTitle, yearVar):
   passedSmallTitle = keymaker(passedTitle)
+  imdbID = getImdbID(passedTitle, yearVar)
   with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r+') as fp:
     try:
       jsonDict = json.load(fp)
@@ -214,6 +237,7 @@ def updateCache(string, passedTitle, yearVar):
           jsonDict[passedSmallTitle] = MovieDict[passedTitle]
           jsonDict[passedSmallTitle]['path'] = os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
           if checkDownloadDate(passedTitle):
+            addToCouchPotato(imdbID)
             videoDownloader(string,passedTitle,yearVar)
             jsonDict[passedSmallTitle]['status'] = 'Downloaded'
           else:
@@ -228,6 +252,7 @@ def updateCache(string, passedTitle, yearVar):
       jsonDict[passedSmallTitle] = MovieDict[passedTitle]
       jsonDict[passedSmallTitle]['path'] = os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
       if checkDownloadDate(passedTitle):
+        addToCouchPotato(imdbID)
         videoDownloader(string, passedTitle, yearVar)
         jsonDict[passedSmallTitle]['status'] = 'Downloaded'
       else:
