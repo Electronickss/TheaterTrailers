@@ -62,11 +62,11 @@ if not os.path.isdir(os.path.join(TheaterTrailersHome, 'Logs')):
 if os.path.isfile(os.path.join(TheaterTrailersHome, 'theaterTrailers.log')):
   shutil.move(os.path.join(TheaterTrailersHome, 'theaterTrailers.log'), os.path.join(TheaterTrailersHome, 'Logs', 'theaterTrailers.log')) 
 fh = logging.FileHandler(os.path.join(TheaterTrailersHome, 'Logs', 'theaterTrailers.log'))
-fh.setLevel(logging.DEBUG)
+fh.setLevel(logging.INFO)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
@@ -120,8 +120,7 @@ def main():
       trailerYear = yearVar[0].strip()
       updateCache(MovieDict[item]['url'], title, trailerYear)
     except KeyError as error:
-      logger.info("KeyError {0}".format(error))
-      logger.info("{0} is missing its release date".format(item))
+      logger.warning("{0} is missing its release date".format(item))
     
 
     
@@ -158,10 +157,16 @@ def checkDownloadDate(passedTitle):
     logger.error(MovieDict[passedTitle] + " has no release date")
 
 def keymaker(string):
-  string = string.replace(" ", "")
-  string = string.replace("'", "")
-  string = string.replace(".", "")
-  string = string.replace("-", "")
+  string = string.replace(" ", '')
+  string = string.replace("?", '')
+  string = string.replace(".", '')
+  string = string.replace("!", '')
+  string = string.replace("/", '')
+  string = string.replace(":", '')
+  string = string.replace(";", '')
+  string = string.replace("'", '')
+  string = string.replace("-", '')
+  string = string.replace(",", '')
   string = string.lower()
   return string
 
@@ -174,10 +179,10 @@ def updateCache(string, passedTitle, yearVar):
         if jsonDict[passedSmallTitle]['url'] == string:
           if jsonDict[passedSmallTitle]['status'] == 'Downloaded':
             if checkFiles(passedTitle, yearVar):
-              logger.debug('{0} from {1} is already downloaded'.format(passedTitle, string))
+              logger.info('{0} from {1} is already downloaded'.format(passedTitle, string))
               return
             else:
-              logger.debug('{0} from {1} was in the cache but did not exist'.format(passedTitle, string))
+              logger.info('{0} from {1} was in the cache but did not exist'.format(passedTitle, string))
               if yearVar == MovieDict[passedTitle]['Trailer Year']:
                 videoDownloader(string,passedTitle,yearVar)
               else:
@@ -186,12 +191,12 @@ def updateCache(string, passedTitle, yearVar):
                   videoDownloader(string,passedTitle,MovieDict[passedTitle]['Trailer Year'])
                   json.dump(jsonDict, temp1, indent=4)
           elif jsonDict[passedSmallTitle]['status'] == 'Released':
-            logger.debug('{0} from {1} has been released'.format(passedTitle, string))
+            logger.info('{0} from {1} has been released'.format(passedTitle, string))
             return
           else:
             logger.error('error with {0} from {1}'.format(passedTitle, string))
         else:
-          logger.debug('New trailer for {0}'.format(passedTitle))
+          logger.info('New trailer for {0}'.format(passedTitle))
           with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp1:
             jsonDict[passedSmallTitle]['url'] = string
             if checkDownloadDate(passedTitle):
@@ -380,7 +385,7 @@ def noCacheCleanup(dirsTitle, dirsYear):
     releaseDateList = releaseDate.split('-')
     if dirsYear == releaseDateList[0]:
       if releaseDate <= currentDate:
-        logger.debug("Removing " + dirsTitle)
+        logger.info("Removing {0}".format(dirsTitle))
         shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
         updatePlex()
     
