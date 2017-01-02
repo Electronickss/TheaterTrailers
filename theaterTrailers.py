@@ -352,6 +352,8 @@ def cleanup():
   if not os.path.isdir(os.path.join(TheaterTrailersHome, 'Trailers')):
     return
   else:
+    if os.path.isfile(os.path.join(TheaterTrailersHome, 'Trailers', '.DS_Store')):
+      os.remove(os.path.join(TheaterTrailersHome, 'Trailers', '.DS_Store'))
     dirsList = os.listdir(os.path.join(TheaterTrailersHome, 'Trailers'))
     for item in dirsList:
       dirsTitle = re.search('^.*(?=(\())', item)
