@@ -234,7 +234,7 @@ def updateCache(string, passedTitle, yearVar):
             logger.error('error with {0} from {1}'.format(passedTitle, string))
         else:
           logger.info('New trailer for {0}'.format(passedTitle))
-          with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp1:
+          with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp2:
             jsonDict[passedSmallTitle]['url'] = string
             if checkDownloadDate(passedTitle):
               shutil.rmtree(jsonDict[passedSmallTitle]['path'])
@@ -242,12 +242,12 @@ def updateCache(string, passedTitle, yearVar):
               jsonDict[passedSmallTitle]['status'] = 'Downloaded'
             else:
               jsonDict[passedSmallTitle]['status'] = 'Released'
-            json.dump(jsonDict, temp1, indent=4)
+            json.dump(jsonDict, temp2, indent=4)
 
       except KeyError as e:
         logger.info(e)
         logger.info('Creating New Entry')
-        with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp2:
+        with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp3:
           jsonDict[passedSmallTitle] = MovieDict[passedTitle]
           jsonDict[passedSmallTitle]['path'] = os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
           if checkDownloadDate(passedTitle):
@@ -255,7 +255,7 @@ def updateCache(string, passedTitle, yearVar):
             jsonDict[passedSmallTitle]['status'] = 'Downloaded'
           else:
             jsonDict[passedSmallTitle]['status'] = 'Released'
-          json.dump(jsonDict, temp2, indent=4)
+          json.dump(jsonDict, temp3, indent=4)
 
     except ValueError as e:
       logger.info(e)
