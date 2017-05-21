@@ -116,19 +116,19 @@ def main():
                 MovieDict[item]['Release Date'] = releaseDate
                 MovieDict[item]['TMDB ID'] = movieTMDBID
             except ValueError as e:
-              logger.error("ValueError {0}".format(e))
+              logger.error("ValueError for {0} {1} 119".format(item, e))
               pass
             except KeyError as e:
-              logger.error("KeyError {0}".format(e))
+              logger.error("KeyError for {0} {1} 122".format(item, e))
               try:
                 MovieDict[item]['Release Date'] = releaseDate
                 MovieDict[item]['TMDB ID'] = movieTMDBID
               except ValueError as e:
-                logger.error("ValueError {0}".format(e))
+                logger.error("ValueError {0} 127".format(e))
                 pass
 
         except AttributeError as ae1:
-          logger.error("AttributeError {0}".format(item))
+          logger.error("AttributeError {0} 131".format(item))
           continue
 
     # Adds the movies to the cache
@@ -158,7 +158,6 @@ def addToRadarr(movieTitle, yearVar, tmdbMovieKey, radarrRootFolderPath):
       "tmdbId": "{0}".format(tmdbMovieKey),
       "rootFolderPath": "{0}".format(radarrRootFolderPath)
     })
-  print json.dumps(r.json())
 
 
 def checkCashe():
@@ -189,7 +188,7 @@ def checkDownloadDate(passedTitle):
     if currentDate < MovieDict[passedTitle]['Release Date']:
       return True
   except KeyError as ke2:
-    logger.error("KeyError {0}".format(ke2))
+    logger.error("KeyError {0} 192".format(ke2))
     logger.error(MovieDict[passedTitle] + " has no release date")
 
 def keymaker(string):
@@ -212,7 +211,6 @@ def updateCache(string, passedTitle, yearVar):
   with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r') as fp:
     try:
       jsonDict = json.load(fp)
-      addToRadarr(passedTitle, yearVar, jsonDict[passedSmallTitle]['TMDB ID'], radarrRootFolderPath)
       try:
         if jsonDict[passedSmallTitle]['url'] == string:
           if jsonDict[passedSmallTitle]['status'] == 'Downloaded':
@@ -246,7 +244,6 @@ def updateCache(string, passedTitle, yearVar):
             json.dump(jsonDict, temp2, indent=4)
 
       except KeyError as e:
-        logger.info(e)
         logger.info('Creating New Entry')
         with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp3:
           jsonDict[passedSmallTitle] = MovieDict[passedTitle]
@@ -257,15 +254,14 @@ def updateCache(string, passedTitle, yearVar):
           else:
             jsonDict[passedSmallTitle]['status'] = 'Released'
           json.dump(jsonDict, temp3, indent=4)
+          addToRadarr(passedTitle, yearVar, jsonDict[passedSmallTitle]['TMDB ID'], radarrRootFolderPath)
 
     except ValueError as e:
-      logger.info(e)
       logger.info('Creating Cache')
       jsonDict = {}
       jsonDict['Creation Date'] = currentDate
       jsonDict[passedSmallTitle] = MovieDict[passedTitle]
       jsonDict[passedSmallTitle]['path'] = os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
-      addToRadarr(passedTitle, yearVar, jsonDict[passedSmallTitle]['TMDB ID'], radarrRootFolderPath)
       with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp4:
         if checkDownloadDate(passedTitle):
           videoDownloader(string, passedTitle, yearVar)
@@ -273,6 +269,8 @@ def updateCache(string, passedTitle, yearVar):
         else:
           jsonDict[passedSmallTitle]['status'] = 'Released'
           json.dump(jsonDict, temp4, indent=4)
+      addToRadarr(passedTitle, yearVar, jsonDict[passedSmallTitle]['TMDB ID'], radarrRootFolderPath)
+
 
   if os.path.isfile(os.path.join(cacheDir, 'theaterTrailersTempCache.json')):
     shutil.move(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), os.path.join(cacheDir, 'theaterTrailersCache.json'))
@@ -428,7 +426,7 @@ def cleanup():
             shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
             updatePlex()
           except ValueError as Ve:
-            logger.warning(Ve)
+            logger.warning("Vaule Error {0} 431".format(Ve))
             noCacheCleanup(dirsTitle, dirsYear)
 
 
