@@ -43,18 +43,20 @@ plexHost = ConfigSectionMap("main", configfile)['plexhost']
 plexPort = ConfigSectionMap("main", configfile)['plexport']
 plexToken = ConfigSectionMap("main", configfile)['plextoken']
 loggingLevel = ConfigSectionMap("main", configfile)['logginglevel']
-couchPotatoHost = ConfigSectionMap("main", configfile)['couchpotatohost']
-couchPotatoPort = ConfigSectionMap("main", configfile)['couchpotatoport']
-couchPotatoKey = ConfigSectionMap("main", configfile)['couchpotatokey']
-pushToCP = ConfigSectionMap("main", configfile)['pushtocp']
-pullFromCp = ConfigSectionMap("main", configfile)['pullfromcp']
-couchPotatoURI = ConfigSectionMap("main", configfile)['couchpotatouri']
+radarrHost = ConfigSectionMap("main", configfile)['radarrhost']
+radarrPort = ConfigSectionMap("main", configfile)['radarrport']
+radarrKey = ConfigSectionMap("main", configfile)['radarrkey']
+pushToRadarr = ConfigSectionMap("main", configfile)['pushtoradarr']
+pullFromRadarr = ConfigSectionMap("main", configfile)['pullfromradarr']
+radarrRootFolderPath = ConfigSectionMap("main", configfile)['radarrrootfolderpath']
+radarrURI = ConfigSectionMap("main", configfile)['radarruri']
 cacheRefresh = int(ConfigSectionMap("main", configfile)['cacherefresh'])
+if not os.path.exists(os.path.join(TheaterTrailersHome, "Cache")):
+  os.makedirs(os.path.join(TheaterTrailersHome, "Cache"))
 cacheDir = os.path.join(TheaterTrailersHome, "Cache")
-if not os.path.exists(cacheDir):
-  os.makedirs(cacheDir)
 if not os.path.isfile(os.path.join(cacheDir, 'theaterTrailersCache.json')):
-  open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'w').close()
+  with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'w') as touch:
+    pass
 
 # Pause in seconds. TMDB has a rate limit of 40 requests per 10 seconds
 pauseRate = .25
@@ -66,7 +68,7 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 if not os.path.isdir(os.path.join(TheaterTrailersHome, 'Logs')):
   os.makedirs(os.path.join(TheaterTrailersHome, 'Logs'))
 if os.path.isfile(os.path.join(TheaterTrailersHome, 'theaterTrailers.log')):
-  shutil.move(os.path.join(TheaterTrailersHome, 'theaterTrailers.log'), os.path.join(TheaterTrailersHome, 'Logs', 'theaterTrailers.log')) 
+  shutil.move(os.path.join(TheaterTrailersHome, 'theaterTrailers.log'), os.path.join(TheaterTrailersHome, 'Logs', 'theaterTrailers.log'))
 fh = logging.FileHandler(os.path.join(TheaterTrailersHome, 'Logs', 'theaterTrailers.log'))
 fh.setLevel(logging.INFO)
 fh.setFormatter(formatter)
@@ -89,14 +91,14 @@ def main():
   checkCashe()
 
   infoDownloader(youtubePlaylist)
-  
+
   # Querries tmdb and updates the release date in the dictionary
   for item in MovieList:
     try:
       if MovieDict['item']['Release Date'] in MovieDict:
         continue
     except KeyError as ke1:
-      with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r+') as fp:
+      with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r') as fp:
         try:
           DB_Dict = json.load(fp)
           MovieDict[item]['Release Date'] = DB_Dict[keymaker(item)]['Release Date']
@@ -107,13 +109,23 @@ def main():
           tempList.reverse()
           for s in tempList:
             releaseDate = s['release_date']
+            movieTMDBID = s['id']
             releaseDateList = releaseDate.split('-')
             try:
               if (int(releaseDateList[0]) - 1) <= int(MovieDict[item]['Trailer Release']) <= (int(releaseDateList[0]) + 1):
                 MovieDict[item]['Release Date'] = releaseDate
+                MovieDict[item]['TMDB ID'] = movieTMDBID
             except ValueError as e:
               logger.error("ValueError {0}".format(e))
               pass
+            except KeyError as e:
+              logger.error("KeyError {0}".format(e))
+              try:
+                MovieDict[item]['Release Date'] = releaseDate
+                MovieDict[item]['TMDB ID'] = movieTMDBID
+              except ValueError as e:
+                logger.error("ValueError {0}".format(e))
+                pass
 
         except AttributeError as ae1:
           logger.error("AttributeError {0}".format(item))
@@ -127,24 +139,26 @@ def main():
       updateCache(MovieDict[item]['url'], title, trailerYear)
     except KeyError as error:
       logger.warning("{0} is missing its release date".format(item))
-    
-
-def getImdbID(title, year):
-  r = requests.get('http://www.omdbapi.com/?t={0}&y={1}&plot=short&r=json'.format(title, year))
-  if r.status_code != 200:
-    logger.warning("Could not reach the omdbapi correctly")
-  else:
-    data = json.loads(r.text)
-    return data["imdbID"]
 
 
-def addToCouchPotato(imdbKey):
-  if couchPotatoKey == "" or couchPotatoHost == "" or couchPotatoPort == "":
+def addToRadarr(movieTitle, yearVar, tmdbMovieKey, radarrRootFolderPath):
+  if radarrKey == "" or radarrHost == "" or radarrPort == "":
     return
-  elif pushToCP == False:
+  elif pushToRadarr == False:
     return
   else:
-    r = requests.get('http://{0}:{1}/{2}api/{3}/movie.add/?identifier="{4}"'.format(couchPotatoHost, couchPotatoPort, couchPotatoURI, couchPotatoKey, imdbKey))
+    headers = {
+      'X-Api-Key': radarrKey
+    }
+    r = requests.post('http://{0}:{1}/{2}/api/movie/'.format(radarrHost, radarrPort, radarrURI), headers=headers, json={
+      "title": "{0} ({1})".format(movieTitle, yearVar),
+      "profileId": 6,
+      "titleSlug": "{0}-{1}".format(slugger(movieTitle), tmdbMovieKey),
+      "images": [],
+      "tmdbId": "{0}".format(tmdbMovieKey),
+      "rootFolderPath": "{0}".format(radarrRootFolderPath)
+    })
+  print json.dumps(r.json())
 
 
 def checkCashe():
@@ -179,25 +193,25 @@ def checkDownloadDate(passedTitle):
     logger.error(MovieDict[passedTitle] + " has no release date")
 
 def keymaker(string):
-  string = string.replace(" ", '')
-  string = string.replace("?", '')
-  string = string.replace(".", '')
-  string = string.replace("!", '')
-  string = string.replace("/", '')
-  string = string.replace(":", '')
-  string = string.replace(";", '')
-  string = string.replace("'", '')
-  string = string.replace("-", '')
-  string = string.replace(",", '')
+  chars_to_remove = [" ", "?", ".", "!", "/", ":", ";", "'", "-", ","]
+  sc = set(chars_to_remove)
+  string = ''.join([c for c in string if c not in sc])
+  return string
+
+def slugger(string):
+  string = string.replace(" ", "-")
+  chars_to_remove = ["?", ".", "!", "/", ":", ";", "'", ","]
+  sc = set(chars_to_remove)
   string = string.lower()
+  string = ''.join([c for c in string if c not in sc])
   return string
 
 def updateCache(string, passedTitle, yearVar):
   passedSmallTitle = keymaker(passedTitle)
-  imdbID = getImdbID(passedTitle, yearVar)
-  with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r+') as fp:
+  with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'r') as fp:
     try:
       jsonDict = json.load(fp)
+      addToRadarr(passedTitle, yearVar, jsonDict[passedSmallTitle]['TMDB ID'], radarrRootFolderPath)
       try:
         if jsonDict[passedSmallTitle]['url'] == string:
           if jsonDict[passedSmallTitle]['status'] == 'Downloaded':
@@ -209,7 +223,7 @@ def updateCache(string, passedTitle, yearVar):
               if yearVar == MovieDict[passedTitle]['Trailer Year']:
                 videoDownloader(string,passedTitle,yearVar)
               else:
-                with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp1:
+                with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp1:
                   jsonDict[passedSmallTitle]['Trailer Year'] = MovieDict[passedTitle]['Trailer Year']
                   videoDownloader(string,passedTitle,MovieDict[passedTitle]['Trailer Year'])
                   json.dump(jsonDict, temp1, indent=4)
@@ -220,7 +234,7 @@ def updateCache(string, passedTitle, yearVar):
             logger.error('error with {0} from {1}'.format(passedTitle, string))
         else:
           logger.info('New trailer for {0}'.format(passedTitle))
-          with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp1:
+          with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp1:
             jsonDict[passedSmallTitle]['url'] = string
             if checkDownloadDate(passedTitle):
               shutil.rmtree(jsonDict[passedSmallTitle]['path'])
@@ -233,11 +247,10 @@ def updateCache(string, passedTitle, yearVar):
       except KeyError as e:
         logger.info(e)
         logger.info('Creating New Entry')
-        with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'a+') as temp2:
+        with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp2:
           jsonDict[passedSmallTitle] = MovieDict[passedTitle]
           jsonDict[passedSmallTitle]['path'] = os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
           if checkDownloadDate(passedTitle):
-            addToCouchPotato(imdbID)
             videoDownloader(string,passedTitle,yearVar)
             jsonDict[passedSmallTitle]['status'] = 'Downloaded'
           else:
@@ -251,13 +264,14 @@ def updateCache(string, passedTitle, yearVar):
       jsonDict['Creation Date'] = currentDate
       jsonDict[passedSmallTitle] = MovieDict[passedTitle]
       jsonDict[passedSmallTitle]['path'] = os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
-      if checkDownloadDate(passedTitle):
-        addToCouchPotato(imdbID)
-        videoDownloader(string, passedTitle, yearVar)
-        jsonDict[passedSmallTitle]['status'] = 'Downloaded'
-      else:
-        jsonDict[passedSmallTitle]['status'] = 'Released'
-        json.dump(jsonDict, fp, indent=4)
+      addToRadarr(passedTitle, yearVar, jsonDict[passedSmallTitle]['TMDB ID'], radarrRootFolderPath)
+      with open(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), 'w') as temp4:
+        if checkDownloadDate(passedTitle):
+          videoDownloader(string, passedTitle, yearVar)
+          jsonDict[passedSmallTitle]['status'] = 'Downloaded'
+        else:
+          jsonDict[passedSmallTitle]['status'] = 'Released'
+          json.dump(jsonDict, temp4, indent=4)
 
   if os.path.isfile(os.path.join(cacheDir, 'theaterTrailersTempCache.json')):
     shutil.move(os.path.join(cacheDir, 'theaterTrailersTempCache.json'), os.path.join(cacheDir, 'theaterTrailersCache.json'))
@@ -279,7 +293,7 @@ def videoDownloader(string, passedTitle, yearVar):
         os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar), '{0} ({1})-trailer.mp4'.format(passedTitle, yearVar))
       )
     shutil.copy2(
-        os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
+        os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'),
         os.path.join(trailerLocation, '{0} ({1})'.format(passedTitle, yearVar))
       )
     updatePlex()
@@ -295,12 +309,12 @@ def infoDownloader(playlist):
     'playliststart': 1,
     'playlistend': playlistEndVar,
     'quiet': False,
-    'matchtitle': '.*\\btrailer\\b.*', 
+    'matchtitle': '.*\\btrailer\\b.*',
     'extract_flat': True,
   }
   with youtube_dl.YoutubeDL(ydl_opts) as ydl:
     info = ydl.extract_info(playlist)
-  
+
   for x in info['entries']:
     MovieVar = x['title'].encode('ascii',errors='ignore')
     MovieVar = MovieVar.replace(':', '')
@@ -316,12 +330,24 @@ def infoDownloader(playlist):
       continue
     trailerYear = re.search('(?<=\().*(?=\))', MovieVar)
     TempDict = { 'url' : info['entries'][info['entries'].index(x)]['url']}
-    movieTitle = regexedTitle.group(0).strip()
+    movieTitleUntrimmed = regexedTitle.group(0).strip()
+    movieTitle = fixTitle(movieTitleUntrimmed)
     MovieDict[movieTitle] = TempDict
-    MovieDict[movieTitle]['Trailer Release'] = trailerYear.group(0)
+    try:
+      MovieDict[movieTitle]['Trailer Release'] = trailerYear.group(0)
+    except AttributeError:
+      pass
     MovieDict[movieTitle]['Movie Title'] = movieTitle
     MovieList.append(movieTitle)
 
+def fixTitle(movieTitle):
+  if "Red Band" in movieTitle:
+    movieTitle = ' '.join(movieTitle.split(' ')[:-2])
+  stopwords = ['Teaser','teaser']
+  querywords = movieTitle.split()
+  resultwords  = [word for word in querywords if word.lower() not in stopwords]
+  result = ' '.join(resultwords)
+  return result
 
 def updatePlex():
   if plexHost == "" or plexPort == "" or plexToken == "":
@@ -337,7 +363,7 @@ def tmdbInfo(item):
   logger.info("querying the movie db for {0}".format(item))
   time.sleep(pauseRate)
   return search.results
-  
+
 
 def checkFiles(title, year):
   if os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), '{0} ({1}).mp4'.format(title, year))):
@@ -349,7 +375,7 @@ def checkFiles(title, year):
       updatePlex()
     if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), 'poster.jpg')):
       shutil.copy2(
-        os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
+        os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'),
         os.path.join(trailerLocation, '{0} ({1})'.format(title, year))
       )
       updatePlex()
@@ -363,7 +389,7 @@ def checkFiles(title, year):
       updatePlex()
     if not os.path.isfile(os.path.join(trailerLocation, '{0} ({1})'.format(title, year), 'poster.jpg')):
       shutil.copy2(
-        os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'), 
+        os.path.join(TheaterTrailersHome, 'res', 'poster.jpg'),
         os.path.join(trailerLocation, '{0} ({1})'.format(title, year))
       )
       updatePlex()
@@ -402,9 +428,9 @@ def cleanup():
             updatePlex()
           except ValueError as Ve:
             logger.warning(Ve)
-            noCacheCleanup(dirsTitle, dirsYear)      
+            noCacheCleanup(dirsTitle, dirsYear)
 
-    
+
 def noCacheCleanup(dirsTitle, dirsYear):
   s = tmdbInfo(dirsTitle)
   for s in search.results:
@@ -415,8 +441,8 @@ def noCacheCleanup(dirsTitle, dirsYear):
         logger.info("Removing {0}".format(dirsTitle))
         shutil.rmtree(os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(dirsTitle, dirsYear)))
         updatePlex()
-    
-    break    
+
+    break
 
 
 if __name__ == "__main__":
