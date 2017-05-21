@@ -195,6 +195,7 @@ def checkDownloadDate(passedTitle):
 def keymaker(string):
   chars_to_remove = [" ", "?", ".", "!", "/", ":", ";", "'", "-", ","]
   sc = set(chars_to_remove)
+  string = string.lower()
   string = ''.join([c for c in string if c not in sc])
   return string
 
