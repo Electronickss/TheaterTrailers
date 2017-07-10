@@ -58,6 +58,7 @@ if not os.path.isfile(os.path.join(cacheDir, 'theaterTrailersCache.json')):
   with open(os.path.join(cacheDir, 'theaterTrailersCache.json'), 'w') as touch:
     pass
 
+
 # Pause in seconds. TMDB has a rate limit of 40 requests per 10 seconds
 pauseRate = .25
 
@@ -160,6 +161,7 @@ def addToRadarr(movieTitle, yearVar, tmdbMovieKey, radarrRootFolderPath):
     })
 
 
+
 def checkCashe():
     if os.path.exists(cacheDir):
       if os.path.isfile(os.path.join(cacheDir, 'theaterTrailersCache.json')):
@@ -172,7 +174,21 @@ def checkCashe():
             age = age.days
             logger.info('The cache is {0} days old'.format(age))
             if(age==cacheRefresh):
+              logger.info('The cache will be refreshed')
               os.remove(os.path.join(cacheDir, 'theaterTrailersCache.json'))
+            try:
+              checkVar = cacheDict[cacheDict.keys()[0]]['status']
+              checkVar = cacheDict[cacheDict.keys()[0]]['TMDB ID']
+              checkVar = cacheDict[cacheDict.keys()[0]]['url']
+              checkVar = cacheDict[cacheDict.keys()[0]]['Trailer Release']
+              checkVar = cacheDict[cacheDict.keys()[0]]['Movie Title']
+              checkVar = cacheDict[cacheDict.keys()[0]]['path']
+              checkVar = cacheDict[cacheDict.keys()[0]]['Release Date']
+            except KeyError as e:
+              logger.info('The cache is missing variables. Removing it.')
+	      print e, 
+              os.remove(os.path.join(cacheDir, 'theaterTrailersCache.json'))
+
 
           except ValueError as e:
             logger.info("ValueError {0}".format(e))
