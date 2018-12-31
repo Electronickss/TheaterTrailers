@@ -40,7 +40,7 @@ This application adds to the movie theater feel of your plex setup, by adding un
 
 ### From within Plex
    
-10. Add a folder inside of the Movie librarie that you want trailers, to `/directoryTo/TheaterTrailers/Trailers/` or `C:\directoryTo\TheaterTrailers\Trailers`
+10. Add a folder inside of the Movie library that you want trailers, to `/directoryTo/TheaterTrailers/Trailers/` or `C:\directoryTo\TheaterTrailers\Trailers`
     * *Note that trailers in different libraries are not shared*
 
 11. Enable trailers on your server
