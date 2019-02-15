@@ -298,7 +298,7 @@ def videoDownloader(string, passedTitle, yearVar):
   ydl1_opts = {
     'outtmpl': os.path.join(TheaterTrailersHome, 'Trailers', '{0} ({1})'.format(passedTitle, yearVar), '{0} ({1}).mp4'.format(passedTitle, yearVar)),
     'ignoreerrors': True,
-    'format': 'bestvideo[ext=mp4]',
+    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
   }
   with youtube_dl.YoutubeDL(ydl1_opts) as ydl:
     logger.info("downloading {0} from {1}".format(passedTitle, string))
