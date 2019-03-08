@@ -1,12 +1,12 @@
 # TheaterTrailers
 [![Build status](https://ci.appveyor.com/api/projects/status/5dbghrb2g2x2dt8o?svg=true)](https://ci.appveyor.com/project/Electronickss/theatertrailers) [![Build Status](https://travis-ci.org/Electronickss/TheaterTrailers.svg?branch=master)](https://travis-ci.org/Electronickss/TheaterTrailers) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/TheaterTrailers/Lobby)
 
-This is a python script that automates the downloading of trailers from youtube using youtube-dl. Trailers are downloaded if their release date hasn't arrived yet and are deleted when it does. Files and folders are named with the standard Plex and The Movie DB naming convention, a "Coming Soon" image is copied in as `poster.jpg` and two versions of the trailer are stored. One is stored with `-trailer` in the name so Plex recognizes it as the trailer and the other is recognized as the movie.
+This is a Python script that automates the downloading of movie trailers from YouTube using youtube-dl. Moive trailers are downloaded if their release date hasn't been reached. The videos will auto-delete when the movie is released. Files and folders are named with the standard naming convetions of  Plex and The Movie DB. A "Coming Soon" image is copied in as `poster.jpg` and two versions of the trailer are stored. One is stored with `-trailer` in the name so Plex recognizes it as the trailer and the other is recognized as the movie.
 
 ---
 # Why?
 
-This application adds to the movie theater feel of your plex setup, by adding unreleased movie's trailers to your library. The idea is to add a more cinematic feal. 
+This application adds to the cinematic feel of your Plex setup by adding trailers of unreleased movies to your library.
 
 ---
 
@@ -29,18 +29,18 @@ This application adds to the movie theater feel of your plex setup, by adding un
    * `pip install --upgrade youtube_dl`
 4. Install [tmdbsimple](https://pypi.python.org/pypi/tmdbsimple)
    * `pip install tmdbsimple`
-5. Sign up at Movie DB for an account and [get a personal api key](https://www.themoviedb.org/documentation/api)
-   * A walk through can be found [here](https://github.com/Electronickss/TheaterTrailers/wiki/Signing-up-for-a-TMDB-API-Key)
+5. Sign up at The Movie DB for an account and [get a personal api key](https://www.themoviedb.org/documentation/api)
+   * A walk-through can be found [here](https://github.com/Electronickss/TheaterTrailers/wiki/Signing-up-for-a-TMDB-API-Key)
 6. *(Optional)* Get your Plex token off of Plex Web
 7. Clone this repository or download it where you want it
    * git clone suggested
-8. Edit the config file to include your api keys. Remove `example` from the `trailers.conf` file title. Adjust other settings as necessary
-9. This script can be ran manually like any other script or configured with Cron/Windows Task Scheduler.
+8. Edit the config file to include your API keys. Remove `example` from the `trailers.conf` file title. Adjust other settings as necessary
+9. This script can be run manually like any other script or configured with Cron/Windows Task Scheduler.
    * Cron examples can be found [here](https://github.com/Electronickss/TheaterTrailers/wiki/Cron-Examples)
 
 ### From within Plex
    
-10. Add a folder inside of the Movie librarie that you want trailers, to `/directoryTo/TheaterTrailers/Trailers/` or `C:\directoryTo\TheaterTrailers\Trailers`
+10. Add a folder inside of the Movie library that you want trailers, to `/directoryTo/TheaterTrailers/Trailers/` or `C:\directoryTo\TheaterTrailers\Trailers`
     * *Note that trailers in different libraries are not shared*
 
 11. Enable trailers on your server
