@@ -40,16 +40,16 @@ This application adds to the cinematic feel of your Plex setup by adding trailer
 
 ### From within Plex
    
-10. Add a folder inside of the Movie library that you want trailers, to `/directoryTo/TheaterTrailers/Trailers/` or `C:\directoryTo\TheaterTrailers\Trailers`
+1. Add a folder inside of the Movie library that you want trailers, to `/directoryTo/TheaterTrailers/Trailers/` or `C:\directoryTo\TheaterTrailers\Trailers`
     * *Note that trailers in different libraries are not shared*
 
-11. Enable trailers on your server
+2. Enable trailers on your server
     * Check the option in `Settings > Server > Extras >  Include Cinema Trailers from movies in my library`
 
-12. Enable trailers on your client
+3. Enable trailers on your client
     * Plex Web: Set the number of trailers in  `Settings > Web > Player > Cinema Trailers to Play Before Movies`
 
-13. *(Optional)* TheaterTrailers copies over a "Coming Soon" poster so that users know it's a trailer. For that to be set to default, local media assets needs to be set as priority within your agents. Go to `Settings > Server > Agents` then adjust within each agent
+4. *(Optional)* TheaterTrailers copies over a "Coming Soon" poster so that users know it's a trailer. For that to be set to default, local media assets needs to be set as priority within your agents. Go to `Settings > Server > Agents` then adjust within each agent
 
 ---
 # Feature Requests
