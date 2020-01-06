@@ -109,7 +109,11 @@ def main():
           tempList = search.results
           tempList.reverse()
           for s in tempList:
-            releaseDate = s['release_date']
+            try:
+              releaseDate = s['release_date']
+            except KeyError as e:
+              logger.warn("The movie does not have a release date -> cancelled? Skipping trailer...")
+              continue
             movieTMDBID = s['id']
             releaseDateList = releaseDate.split('-')
             try:
